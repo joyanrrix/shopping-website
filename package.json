@@ -4,7 +4,7 @@
   "description": "The project for IEMS5718 is currently in Phase 1, where all the basic elements are hardcoded.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
