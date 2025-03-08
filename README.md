@@ -1,5 +1,3 @@
 # shopping-website
 
-The project for IEMS5718 is currently in Phase 1, where all the basic elements are hardcoded.
-
-![alt text](screenshot.gif)
+The project for IEMS5718 is currently in Phase 3, add database server and backend function.
