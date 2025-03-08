@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="./stylesheets/admin.css">
+    <script src="./javascripts/admin.js"></script>
+</head>
+<body class="admin">
+    <header class="sticky_header">
+        <div class="logo">Admin Panel</div>
+        <div class="top_bar">
+            <div class="left_section">
+                <button class="menu_button">
+                    <i class="fa-solid fa-bars"></i>
+                    Table
+                    <i class="fa-solid fa-angle-down"></i>
+                </button>
+                <span class="divider"></span>
+                <div>
+                    <nav class="breadcrumb">
+                        Home
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <aside class="sidebar">
+        <ul>
+            <li class="title">All Tables</li>
+            <div class="tables"></div>
+        </ul>
+    </aside>
+    
+    <section class="main_container">
+        <div class="overlay"></div>
+        <button class="add_item_button">Add Item</button>
+        <table class="table"></table>
+    </section>
+
+    <div id="item_modal" class="modal">
+        <span class="close_modal">&times;</span>
+        <div class="modal_content"></div>
+    </div>
+</body>
+</html>

@@ -6,7 +6,7 @@
     <title>Shopping Website</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="./stylesheets/style.css">
-    <script src="./javascripts/script.js"></script>
+    <script type="module" src="./javascripts/script.js"></script>
 </head>
 <body class="home">
     <header class="sticky_header">
@@ -19,11 +19,14 @@
                     Category
                     <i class="fa-solid fa-angle-down"></i>
                 </button>
+                <div class="admin_panel_container">
+                    <button class="admin_panel_button" onclick="window.location.href='admin.html'">
+                        Admin Panel
+                    </button>
+                </div>
                 <span class="divider"></span>
                 <div>
-                    <nav class="breadcrumb">
-                        <a href="index.html">Home</a>
-                    </nav>
+                    <nav class="breadcrumb"></nav>
                 </div>
             </div>
             <div class="cart_container">
@@ -35,14 +38,14 @@
                     <button class="checkout_button">Checkout</button>
                 </div>
             </div>
+            
         </div>
     </header>
 
     <aside class="sidebar">
         <ul>
             <li class="category_title">All Categories</li>
-            <li class="category_item">Food</li>
-            <li class="category_item">Electronics</li>
+            <div class="items"></div>
         </ul>
     </aside>
     
