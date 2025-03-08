@@ -22,7 +22,7 @@ class Breadcrumb {
                 this.breadcrumb.appendChild(path);
             } else {
                 const path = document.createElement("a");
-                path.href = "";
+                path.href = "javascript:void(0)";
                 path.id = "breadcrumb_back";
                 path.textContent = item;
                 path.addEventListener("click", (e) => {
