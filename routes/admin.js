@@ -3,10 +3,12 @@ var path = require('path');
 var router = express.Router();
 const connection = require('../config/database');
 const multer = require('multer');
+const { user } = require('../public/javascripts/user');
 const upload = multer({ dest: 'public/images/' });
 
 router.get('/', function (req, res, next) {
-	res.sendFile(path.join(__dirname, '../public/admin.html'));
+	// res.sendFile(path.join(__dirname, '../public/admin.html'));
+	res.render('admin');
 });
 
 router.get('/tables', function (req, res, next) {
@@ -33,6 +35,14 @@ router.get('/products', function (req, res, next) {
 	});
 });
 
+router.get('/users', (req, res, next) => {
+	connection.query('SELECT * from users', function (err, rows, fields) {
+		if (err) throw err;
+		console.log(rows);
+		res.json(rows);
+	});
+});
+
 // UPDATE products
 router.put('/products', upload.single('image'), function (req, res, next) {
 	const { pid, catid, name, price, description } = req.body;
@@ -50,7 +60,20 @@ router.put('/products', upload.single('image'), function (req, res, next) {
 // UPDATE categories
 router.put('/categories', function (req, res, next) {
 	const { catid, name } = req.body;
-	connection.query('UPDATE categories SET name = ? WHERE catid = ?', [name, catid], function (err, rows, fields) {
+	const query = 'UPDATE categories SET name = ? WHERE catid = ?';
+	const params = [name, catid];
+	connection.query(query, params, function (err, rows, fields) {
+		if (err) throw err;
+		console.log(rows);
+		res.json(rows);
+	});
+});
+
+router.put('/users', (req, res, next) => {
+	const { userid, email, password, isAdmin } = req.body;
+	console.log(req.body);
+	const query = 'UPDATE users SET email = ?, password = ?, isAdmin = ? WHERE userid = ?';
+	connection.query(query, [email, password, isAdmin, userid], function (err, rows, fields) {
 		if (err) throw err;
 		console.log(rows);
 		res.json(rows);
@@ -61,7 +84,9 @@ router.put('/categories', function (req, res, next) {
 // DELETE products
 router.delete('/products/:pid', function (req, res, next) {
 	const pid = req.params.pid;
-	connection.query('DELETE FROM products WHERE pid = ?', [pid], function (err, rows, fields) {
+	const query = 'DELETE FROM products WHERE pid = ?';
+	const params = [pid];
+	connection.query(query, params, function (err, rows, fields) {
 		if (err) throw err;
 		console.log(rows);
 		res.json(rows);
@@ -72,7 +97,20 @@ router.delete('/products/:pid', function (req, res, next) {
 // DELETE categories
 router.delete('/categories/:catid', function (req, res, next) {
 	const catid = req.params.catid;
-	connection.query('DELETE FROM categories WHERE catid = ?', [catid], function (err, rows, fields) {
+	const query = 'DELETE FROM categories WHERE catid = ?';
+	const params = [catid];
+	connection.query(query, params, function (err, rows, fields) {
+		if (err) throw err;
+		console.log(rows);
+		res.json(rows);
+	});
+});
+
+router.delete('/users/:userid', (req, res, next) => {
+	const userid = req.params.userid;
+	const query = 'DELETE FROM users WHERE userid = ?';
+	const params = [userid];
+	connection.query(query, params, function (err, rows, fields) {
 		if (err) throw err;
 		console.log(rows);
 		res.json(rows);
@@ -99,11 +137,15 @@ router.post('/products', upload.single('image'), function (req, res, next) {
 // ADD categories
 router.post('/categories', function (req, res, next) {
 	const { name } = req.body;
-	connection.query('INSERT INTO categories (name) VALUES (?)', [name], function (err, rows, fields) {
+	const query = 'INSERT INTO categories (name) VALUES (?)';
+	const params = [name];
+	connection.query(query, params, function (err, rows, fields) {
 		if (err) throw err;
 		console.log(rows);
 		res.json(rows);
 	});
 });
+
+router
 
 module.exports = router;

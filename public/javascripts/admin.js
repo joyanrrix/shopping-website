@@ -3,10 +3,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const menuButton = document.querySelector(".menu_button");
     const mainContainer = document.querySelector(".main_container");
     const breadcrumb = document.querySelector(".breadcrumb");
-
+    const logoutButton = document.querySelector(".logout_button");
 
     fetchTables();
 
+    logoutButton.addEventListener("click", async () => {
+        const response = await fetch('/logout');
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = "/";
+        }
+    });
 
     menuButton.addEventListener("click", function () {
         sidebar.classList.toggle("active");
@@ -209,6 +216,37 @@ document.addEventListener("DOMContentLoaded", function () {
             saveButton.textContent = "Save";
             saveButton.id = "save_item";
             modalContent.appendChild(saveButton);
+        } else if (tableName == "users") {
+            const emailLabel = document.createElement("label");
+            emailLabel.textContent = "Email";
+            modalContent.appendChild(emailLabel);
+            const emailInput = document.createElement("input");
+            emailInput.id = "edit_email";
+            emailInput.value = item.email;
+            modalContent.appendChild(emailInput);
+
+            const passwordLabel = document.createElement("label");
+            passwordLabel.textContent = "Password";
+            modalContent.appendChild(passwordLabel);
+            const passwordInput = document.createElement("input");
+            passwordInput.id = "edit_password";
+            passwordInput.value = item.password;
+            modalContent.appendChild(passwordInput);
+
+            const isAdminLabel = document.createElement("label");
+            isAdminLabel.textContent = "isAdmin";
+            modalContent.appendChild(isAdminLabel);
+            const isAdminInput = document.createElement("input");
+            isAdminInput.id = "edit_isAdmin";
+            isAdminInput.type = "checkbox";
+            isAdminInput.checked = item.isAdmin;
+            modalContent.appendChild(isAdminInput);
+
+
+            const saveButton = document.createElement("button");
+            saveButton.textContent = "Save";
+            saveButton.id = "save_item";
+            modalContent.appendChild(saveButton);
         } else {
             const nameLabel = document.createElement("label");
             nameLabel.textContent = "Name";
@@ -237,6 +275,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     formData.append("image", imageFile);
                 }
                 updateItem(tableName, formData);
+            } else if (tableName == "users") {
+                const updatedItem = {
+                    userid: item.userid,
+                    email: document.getElementById("edit_email").value,
+                    password: document.getElementById("edit_password").value,
+                    isAdmin: document.getElementById("edit_isAdmin").checked,
+                };
+                updateItem(tableName, updatedItem);
+
             } else {
                 const updatedItem = {
                     catid: item.catid,
@@ -287,6 +334,7 @@ document.addEventListener("DOMContentLoaded", function () {
             modalContent.appendChild(priceLabel);
             const priceInput = document.createElement("input");
             priceInput.id = "edit_price";
+            priceInput.type = "number";
             modalContent.appendChild(priceInput);
 
             const descriptionLabel = document.createElement("label");
@@ -351,12 +399,30 @@ document.addEventListener("DOMContentLoaded", function () {
         if (tableName === "products") {
             fetch('/admin/' + tableName, {
                 method: 'PUT',
+                headers: {
+                    'Csrf-Token': document.querySelector('input[id="csrfToken"]').value
+                },
                 body: item
             })
                 .then(response => response.json())
                 .then(() => {
                     fetchItems(breadcrumb.innerHTML);
                 });
+        } else if (tableName == "users") {
+            console.log(item);
+            fetch('/admin/' + tableName, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Csrf-Token': document.querySelector('input[id="csrfToken"]').value
+                },
+                body: JSON.stringify(item)
+            })
+                .then(response => response.json())
+                .then(() => {
+                    fetchItems(breadcrumb.innerHTML);
+                });
+
         } else {
             fetch('/admin/' + tableName, {
                 method: 'PUT',

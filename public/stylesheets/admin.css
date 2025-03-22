@@ -235,3 +235,7 @@ body {
     text-decoration: none;
     cursor: pointer;
 }
+
+.logout_button {
+    margin: 0 10px;
+}

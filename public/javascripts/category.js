@@ -71,4 +71,4 @@ class Category {
     }
 }
 
-export var category = new Category
+export var category = new Category();

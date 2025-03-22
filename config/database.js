@@ -1,10 +1,10 @@
 const mysql = require('mysql2');
 
 var connection = mysql.createConnection({
-  host: "1155226868-iems5718.mysql.database.azure.com",
-  user: "yang",
-  password: "Zhang@1205",
-  database: "shop",
+  host: "",
+  user: "",
+  password: "",
+  database: "",
   ssl: {
     rejectUnauthorized: true
   }
