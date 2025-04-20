@@ -9,10 +9,6 @@
 <body>
   <div class="error-container">
     <h1>Error <%= error.status || 500 %></h1>
-    <p><%= error.message %></p>
-    <% if (error.stack) { %>
-      <pre><%= error.stack %></pre>
-    <% } %>
   </div>
 </body>
 </html>

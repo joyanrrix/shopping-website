@@ -1,4 +1,5 @@
 import { product } from "./product.js";
+import { Utils } from "./utils.js";
 
 class Breadcrumb {
     constructor() {
@@ -6,8 +7,8 @@ class Breadcrumb {
         this.curPath = [];
     }
 
-    initBreadcrumb() {
-        this.curPath = ['Home'];
+    initBreadcrumb(initPath = null) {
+        this.curPath = initPath? [initPath]: ['Home'];
         this.updateBreadcrumb();
     }
 
@@ -36,6 +37,21 @@ class Breadcrumb {
                 this.breadcrumb.appendChild(angle);
             }
         })
+    }
+
+    renderClickableHome() {
+        this.breadcrumb.innerHTML = "";
+
+        const path = document.createElement("a");
+        path.href = "javascript:void(0)";
+        path.id = "breadcrumb_back";
+        path.textContent = "Home";
+
+        path.addEventListener("click", (e) => {
+            this.back(e.target.textContent);
+        });
+        
+        this.breadcrumb.appendChild(path);
     }
 
     enter(path) {

@@ -1,6 +1,7 @@
-var express = require('express');
-var router = express.Router();
-const connection = require('../config/database');
+import express from 'express';
+import connection from '../config/database.js';
+
+const router = express.Router();
 
 router.get('/get_categories', function(req, res, next) {
     const query = 'SELECT * FROM categories';
@@ -11,4 +12,4 @@ router.get('/get_categories', function(req, res, next) {
     });
 });
 
-module.exports = router;
+export default router;

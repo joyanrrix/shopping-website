@@ -1,30 +1,30 @@
 import { product } from "./product.js";
 import { breadcrumb } from "./breadcrumb.js";
+import { Utils } from "./utils.js";
+import { table } from "./table.js";
 
 class Category {
     constructor() {
         this.sidebar = document.querySelector(".sidebar");
+        this.sidebarItems = document.querySelector(".sidebar .items");
         this.menuButton = document.querySelector(".menu_button");
-        this.categoryItems = document.querySelector('.sidebar .items');
+        this.overlay = document.querySelector('.overlay');
+        this.hidenTimeout = null;
 
         this.bindEvent()
     }
 
     bindEvent() {
-        this.menuButton.addEventListener("click", (e) => {
-            this.showCategoryList();
-        });
+        this.menuButton.addEventListener("mouseenter", () => this.showSidebar());
+        this.sidebar.addEventListener("mouseenter", () => this.showSidebar());
 
-        document.addEventListener("click", (e) => {
-            if (!this.sidebar.contains(e.target) && !this.menuButton.contains(e.target)) {
-                this.closeCategoryList()
-            }
-        });
+        this.menuButton.addEventListener("mouseleave", () => this.hideSidebarWithDelay());
+        this.sidebar.addEventListener("mouseleave", () => this.hideSidebarWithDelay());
     }
 
-    async fetchCategory() {
+    async fetchTables() {
         try {
-            const response = await fetch('/categories/get_category');
+            const response = await fetch('/admin/get_tables');
             const data = await response.json();
             return data;
         } catch(err) {
@@ -42,8 +42,31 @@ class Category {
         }
     }
 
-    async renderCategoryList(categories) {
-        this.categoryItems.innerHTML = '';
+    async renderSidebar(items) {
+        this.sidebarItems.innerHTML = '';
+        if (Utils.isAdmin()) {
+            this.addTablesToSidebar(items);
+        } else {
+            this.addCategoriesToSidebar(items);
+        }
+    }
+
+    addTablesToSidebar(tables) {
+        tables.forEach(item => {
+            const tableItem = document.createElement('li');
+            tableItem.className = 'category_item';
+            tableItem.textContent = item.Tables_in_shop;
+            tableItem.addEventListener('click', async (e) => {
+                breadcrumb.initBreadcrumb(tableItem.textContent);
+                table.renderTable(tableItem.textContent);
+                this.hideSidebar();
+            });
+
+            this.sidebarItems.appendChild(tableItem);
+        });
+    }
+
+    addCategoriesToSidebar(categories) {
         categories.forEach(category => {
             const categoryItem = document.createElement('li');
             categoryItem.className = 'category_item';
@@ -51,23 +74,33 @@ class Category {
             categoryItem.addEventListener('click', async (e) => {
                 breadcrumb.initBreadcrumb();
                 breadcrumb.enter(e.target.textContent);
+
                 const products = await product.fetchProductsByCatId(category.catid);
                 product.renderProductList(products);
-                this.closeCategoryList();
+                this.hideSidebar();
             });
 
-            this.categoryItems.appendChild(categoryItem);
+            this.sidebarItems.appendChild(categoryItem);
         });
     }
+        
 
-    showCategoryList() {
-        this.sidebar.classList.toggle("active");
-        product.mainContainer.classList.toggle("dimmed");
+    showSidebar() {
+        clearTimeout(this.hidenTimeout);
+        this.sidebar.style.display = 'block';
+        this.overlay.style.display = 'block';
     }
 
-    closeCategoryList() {
-        this.sidebar.classList.remove("active");
-        product.mainContainer.classList.remove("dimmed");
+    hideSidebarWithDelay() {
+        this.hidenTimeout = setTimeout(() => {
+            this.sidebar.style.display = 'none';
+            this.overlay.style.display = 'none';
+        }, 300);
+    }
+
+    hideSidebar() {
+        this.sidebar.style.display = 'none';
+        this.overlay.style.display = 'none';
     }
 }
 

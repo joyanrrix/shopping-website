@@ -1,7 +1,8 @@
-export class ShoppingCart {
+import { Utils } from "./utils.js";
+
+class ShoppingCart {
     constructor() {
         this.cart = new Map();
-        this.loadFromStorage();
     }
 
     saveToStorage() {
@@ -10,24 +11,28 @@ export class ShoppingCart {
                 "pid": pid,
                 "quantity": product.quantity
             }));
-        console.log(data);
+
         localStorage.setItem('shopping-cart', JSON.stringify(data));
     }
 
-    loadFromStorage() {
+    async loadFromStorage() {
         const data = JSON.parse(localStorage.getItem('shopping-cart'));
-        if (!data) return;
-        data.forEach(async ({ pid, quantity }) => {
-            try {
+
+        try {
+            const productPromises = data.map(async ({ pid, quantity }) => {
                 const response = await fetch(`/products/get_product_by_id?pid=${pid}`);
                 const product = await response.json();
                 product.quantity = quantity;
-                this.cart.set(pid, product);
-                this.updateUI();
-            } catch (error) {
-                console.error(error);
-            }
-        });
+                return product;
+            });
+
+            const products = await Promise.all(productPromises);
+            products.forEach(([pid, product]) => this.cart.set(pid, product));
+
+            this.updateUI();
+        } catch (error) {
+            console.error("Error loading cart from storage:", error);
+        }
     }
 
     addToCart(product) {
@@ -44,7 +49,7 @@ export class ShoppingCart {
         const cartItems = document.querySelector(".cart_items");
         cartItems.innerHTML = "";
         var total = 0;
-        console.log(this.cart);
+
         this.cart.forEach(product => {
             total += product.price * product.quantity;
 
@@ -97,9 +102,16 @@ export class ShoppingCart {
         });
         document.querySelector(".cart_count").innerText = `$${total.toFixed(2)}`;
         this.saveToStorage();
+        if (this.cart.size === 0) {
+            document.querySelector("#paypal-button-container").style.display = "none";
+        } else {
+            document.querySelector("#paypal-button-container").style.display = "block";
+        }
     }
 
     getCart() {
         return this.cart;
     }
 }
+
+export const shoppingCart = new ShoppingCart();

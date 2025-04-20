@@ -1,0 +1,51 @@
+<header class="sticky_header">
+    <div class="logo">
+        <% if (user) { %>
+            Shopping Center
+        <% } else { %>
+            Admin Panel
+        <% } %>
+    </div>
+
+    <div class="top_bar">
+        <div class="left_section">
+            <button class="menu_button">
+                <i class="fa-solid fa-bars"></i>
+                <% if (user) { %>
+                    Category
+                <% } else { %>
+                    Table
+                <% } %>
+                <i class="fa-solid fa-angle-down"></i>
+            </button>
+            <span class="divider"></span>
+            <div>
+                <nav class="breadcrumb"></nav>
+            </div>
+        </div>
+        <div class="right_section">
+            <% if (user) { %>
+                <div class="order_history">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Orders</span>
+                </div>
+                <div class="cart_container">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="cart_count">$0.00</span>
+                    <div class="shopping_list">
+                        <h3>Shopping Cart</h3>
+                        <ul class="cart_items"></ul>
+                        <div id="paypal-button-container"></div>
+                    </div>
+                </div>
+                <div class="user_container">
+                    <i class="fa-solid fa-user"></i>
+                    <span class="user_name"></span>
+                    <div class="user_panel"></div>
+                </div>
+            <% } else { %>
+                <button class="logout_button">Logout</button>
+            <% } %>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/style.css"> 
+</head>
+<body>
+    <%- include('components/sticky_header.ejs') %>
+
+    <h1>Order History</h1>
+    <p>Check out the status of recent orders, manage returns, and discover similar products.</p>
+
+    <% orders.forEach(order => { %>
+        <div class="order">
+            <div class="order-header">
+                <p><strong>OrderId:</strong> <%= order.id %></p>
+                <p><strong>Date:</strong> <%= new Date(order.create_at).toLocaleDateString() %></p>
+                <p><strong>Total amount:</strong> $<%= order.total %></p>
+            </div>
+            <div class="order-items">
+                <% order.items.forEach(item => { %>
+                    <div class="item">
+                        <p><strong><%= item.name %></strong></p>
+                        <p>$<%= item.price.toFixed(2) %> x <%= item.quantity %></p>
+                    </div>
+                <% }) %>
+            </div>
+            <div class="order-footer">
+                <p><strong>Status:</strong> <%= order.status %></p>
+            </div>
+        </div>
+    <% }) %>
+</body>
+</html>

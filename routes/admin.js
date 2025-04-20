@@ -1,17 +1,19 @@
-var express = require('express');
-var path = require('path');
-var router = express.Router();
-const connection = require('../config/database');
-const multer = require('multer');
-const { user } = require('../public/javascripts/user');
+import express from 'express';
+import connection from '../config/database.js';
+import multer from 'multer';
+
+const router = express.Router();
 const upload = multer({ dest: 'public/images/' });
 
 router.get('/', function (req, res, next) {
-	// res.sendFile(path.join(__dirname, '../public/admin.html'));
-	res.render('admin');
+	if (req.cookies != undefined && req.cookies.userid == 1) {
+		res.render('admin', { user: false });
+	} else {
+		res.redirect('error');
+	}
 });
 
-router.get('/tables', function (req, res, next) {
+router.get('/get_tables', function (req, res, next) {
 	connection.query('SHOW TABLES', function (err, rows, fields) {
 		if (err) throw err;
 		console.log(rows);
@@ -19,36 +21,58 @@ router.get('/tables', function (req, res, next) {
 	});
 });
 
-router.get('/categories', function (req, res, next) {
-	connection.query('SELECT * from categories', function (err, rows, fields) {
+router.get('/get_table_items', function (req, res, next) {
+	const table = req.query.table;
+	const query = 'SELECT * FROM ??';
+	connection.query(query, [table], function (err, rows, fields) {
 		if (err) throw err;
 		console.log(rows);
 		res.json(rows);
 	});
 });
 
-router.get('/products', function (req, res, next) {
-	connection.query('SELECT * from products', function (err, rows, fields) {
+router.post('/update_table', upload.single('image'), (req, res, next) => {
+	const table = req.query.table;
+
+	const primaryKey = Object.keys(req.body)[0] // 动态获取主键字段
+
+	const updates = [];
+    const params = [];
+
+	Object.entries(req.body).forEach(([key, value]) => {
+        if (key !== primaryKey) {
+            updates.push(`${key} = ?`);
+            params.push(value);
+        }
+    });
+
+	if (req.file) {
+		updates.push('image = ?');
+		params.push(req.file.filename);
+	}
+
+	params.push(primaryKey);
+	params.push(req.body[primaryKey]);
+
+    const query = `UPDATE ?? SET ${updates.join(', ')} WHERE ?? = ?`;
+    const queryParams = [table, ...params];
+
+	connection.query(query, queryParams, function (err, rows, fields) {
 		if (err) throw err;
 		console.log(rows);
 		res.json(rows);
 	});
 });
 
-router.get('/users', (req, res, next) => {
-	connection.query('SELECT * from users', function (err, rows, fields) {
-		if (err) throw err;
-		console.log(rows);
-		res.json(rows);
-	});
-});
+router.post('/delete_item', (req, res, next) => {
+	const table = req.query.table;
 
-// UPDATE products
-router.put('/products', upload.single('image'), function (req, res, next) {
-	const { pid, catid, name, price, description } = req.body;
-	const image = req.file ? req.file.filename : null;
-	const query = 'UPDATE products SET catid = ?, name = ?, price = ?, description = ?, image = ? WHERE pid = ?';
-	const params = [catid, name, price, description, image, pid];
+	const key = Object.keys(req.body)[0];
+    const value = req.body[key];
+
+	const query = `DELETE FROM ?? WHERE ?? = ?`;
+	const params = [table, key, value];
+
 	connection.query(query, params, function (err, rows, fields) {
 		if (err) throw err;
 		console.log(rows);
@@ -56,12 +80,28 @@ router.put('/products', upload.single('image'), function (req, res, next) {
 	});
 });
 
+router.post('/add_item', upload.single('image'), (req, res, next) => {
+	const table = req.query.table;
 
-// UPDATE categories
-router.put('/categories', function (req, res, next) {
-	const { catid, name } = req.body;
-	const query = 'UPDATE categories SET name = ? WHERE catid = ?';
-	const params = [name, catid];
+	const columns = [];
+	const values = [];
+	const placeholders = [];
+
+	Object.entries(req.body).forEach(([key, value]) => {
+		columns.push(key);
+		values.push(value);
+		placeholders.push('?');
+	});
+
+	if (req.file) {
+        columns.push('image');
+        values.push(req.file.filename);
+        placeholders.push('?');
+    }
+
+	const query = `INSERT INTO ?? (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
+	const params = [table, ...values];
+
 	connection.query(query, params, function (err, rows, fields) {
 		if (err) throw err;
 		console.log(rows);
@@ -69,83 +109,4 @@ router.put('/categories', function (req, res, next) {
 	});
 });
 
-router.put('/users', (req, res, next) => {
-	const { userid, email, password, isAdmin } = req.body;
-	console.log(req.body);
-	const query = 'UPDATE users SET email = ?, password = ?, isAdmin = ? WHERE userid = ?';
-	connection.query(query, [email, password, isAdmin, userid], function (err, rows, fields) {
-		if (err) throw err;
-		console.log(rows);
-		res.json(rows);
-	});
-});
-
-
-// DELETE products
-router.delete('/products/:pid', function (req, res, next) {
-	const pid = req.params.pid;
-	const query = 'DELETE FROM products WHERE pid = ?';
-	const params = [pid];
-	connection.query(query, params, function (err, rows, fields) {
-		if (err) throw err;
-		console.log(rows);
-		res.json(rows);
-	});
-});
-
-
-// DELETE categories
-router.delete('/categories/:catid', function (req, res, next) {
-	const catid = req.params.catid;
-	const query = 'DELETE FROM categories WHERE catid = ?';
-	const params = [catid];
-	connection.query(query, params, function (err, rows, fields) {
-		if (err) throw err;
-		console.log(rows);
-		res.json(rows);
-	});
-});
-
-router.delete('/users/:userid', (req, res, next) => {
-	const userid = req.params.userid;
-	const query = 'DELETE FROM users WHERE userid = ?';
-	const params = [userid];
-	connection.query(query, params, function (err, rows, fields) {
-		if (err) throw err;
-		console.log(rows);
-		res.json(rows);
-	});
-});
-
-
-// ADD products
-router.post('/products', upload.single('image'), function (req, res, next) {
-	console.log(req.file);
-	const { catid, name, price, description } = req.body;
-	const image = req.file ? req.file.filename : null;
-	console.log(image);
-	const query = 'INSERT INTO products (catid, name, price, description, image) VALUES (?, ?, ?, ?, ?)';
-	const params = [catid, name, price, description, image];
-	connection.query(query, params, function (err, rows, fields) {
-		if (err) throw err;
-		console.log(rows);
-		res.json(rows);
-	});
-});
-
-
-// ADD categories
-router.post('/categories', function (req, res, next) {
-	const { name } = req.body;
-	const query = 'INSERT INTO categories (name) VALUES (?)';
-	const params = [name];
-	connection.query(query, params, function (err, rows, fields) {
-		if (err) throw err;
-		console.log(rows);
-		res.json(rows);
-	});
-});
-
-router
-
-module.exports = router;
+export default router;

@@ -1,17 +1,23 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var csurf = require('csurf');
-var session = require('express-session');
-var logger = require('morgan');
-var helmet = require('helmet');
+import createError from 'http-errors';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import csurf from 'csurf';
+import session from 'express-session';
+import logger from 'morgan';
+import helmet from 'helmet';
 
-var indexRouter = require('./routes/index');
-var adminRouter = require('./routes/admin');
-var productsRouter = require('./routes/products');
-var categoriesRouter = require('./routes/categories');
+import indexRouter from './routes/index.js';
+import adminRouter from './routes/admin.js';
+import productsRouter from './routes/products.js';
+import categoriesRouter from './routes/categories.js';
+import checkoutRouter from './routes/checkout.js';
+import ordersRouter from './routes/orders.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 var app = express();
 
@@ -35,10 +41,12 @@ app.use(session({
 app.use(helmet.contentSecurityPolicy({
     directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "fonts.googleapis.com", 'cdnjs.cloudflare.com'],
-        scriptSrc: ["'self'", 'cdnjs.cloudflare.com'],
-        fontSrc: ["'self'", 'fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com'],
-        imgSrc: ["'self'", "data:"]
+        styleSrc: ["'self'", "fonts.googleapis.com", 'cdnjs.cloudflare.com', 'https://*.paypalobjects.com', "'unsafe-inline'"],
+        scriptSrc: ["'self'", 'cdnjs.cloudflare.com', 'https://*.paypal.com', 'https://*.paypalobjects.com', "'unsafe-inline'"],
+        fontSrc: ["'self'", 'fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com', 'https://*.paypalobjects.com'],
+        imgSrc: ["'self'", "data:", 'https://*.paypalobjects.com', 'https://*.paypal.com'],
+        connectSrc: ["'self'", 'https://*.paypal.com'],
+        frameSrc: ["'self'", 'https://*.paypal.com'],
     }
 }));
 
@@ -55,6 +63,8 @@ app.use('/', indexRouter);
 app.use('/products', productsRouter);
 app.use('/categories', categoriesRouter);
 app.use('/admin', adminRouter);
+app.use('/checkout', checkoutRouter);
+app.use('/orders', ordersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -72,4 +82,4 @@ app.use(function (err, req, res, next) {
     res.render('error');
 });
 
-module.exports = app;
+export default app;
